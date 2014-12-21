@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Diamond Cost Predictor</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Diamond Cost Predictor">
+  <meta name="author" content="">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Diamond Cost Predictor</h1>
+    <h2>diamond data analysis</h2>
+    <p><br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>How much cost a Diamond?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>For this assignment, I did prepared a Shiny application in which the user will input the Carats of a Diamond stone and it will get its price based on the statistical data.</p>
+
+<h3>Loading of the packages</h3>
+
+<p>The first part is the declaration of the package which will be used. </p>
+
+<pre><code class="r">library(shiny)
+library(UsingR)
+</code></pre>
+
+<h3>Reading of the Data</h3>
+
+<p>We began by reading in the data.</p>
+
+<p>The data is in SIN$ but the final results will be in US$ (at a change rate based on the date at Dec. 20 2014 of: USD/SGD = 0.77134)</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <article data-timings="">
+    <pre><code class="r">data(diamond)
+</code></pre>
+
+<hr>
+
+<h3>Fitting the Model</h3>
+
+<p>I created a novel prediction algorithm to predict the cost in US$dollars for each 
+diamond stone.</p>
+
+<pre><code class="r">fit= lm(price ~ carat, data = diamond)
+</code></pre>
+
+<p>A quick look at the data :</p>
+
+<pre><code class="r">summary(diamond)
+</code></pre>
+
+<pre><code>##      carat            price       
+##  Min.   :0.1200   Min.   : 223.0  
+##  1st Qu.:0.1600   1st Qu.: 337.5  
+##  Median :0.1800   Median : 428.5  
+##  Mean   :0.2042   Mean   : 500.1  
+##  3rd Qu.:0.2500   3rd Qu.: 657.0  
+##  Max.   :0.3500   Max.   :1086.0
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <article data-timings="">
+    <p>The following is the source used to create the application: </p>
+
+<h3>The Interactive Application using the Shiny package</h3>
+
+<p>A shiny project is a directory containing at least two parts
+One named ui.R (for user interface) controls how it looks.
+One named server.R that controls what it does.</p>
+
+<p>Here are the files: </p>
+
+<h3>ui.R</h3>
+
+<pre><code class="r">library(shiny)
+shinyUI(
+        pageWithSidebar(
+                # Price of Diamonds per Carat prediction
+                headerPanel(&quot;Price of Diamonds per Carat prediction&quot;),                
+                sidebarPanel(
+                        numericInput(&#39;carat&#39;, &#39;Enter the weight in carats&#39;, 0.1 ,
+                                     min = .01, max = 2.0, step = 0.01),
+                        submitButton(&#39;Submit&#39;)
+                ),mainPanel(
+                        h3(&#39;Results of the prediction&#39;),
+                        h4(&#39;You entered the following carats&#39;),
+                        verbatimTextOutput(&quot;inputValue&quot;),
+                        h4(&#39;Which will cost you (in $US)&#39;),
+                        verbatimTextOutput(&quot;prediction&quot;)
+                )        ))
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h3>server.r</h3>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">library(shiny)
+library(UsingR)
+data(diamond)
+fit= lm(price ~ carat, data = diamond)
+slope&lt;-coef(fit)[2]
+names(slope)&lt;- &quot;US$ Dollars&quot;
+CaratPrice &lt;- function(carat) {0.77134*(carat*slope + coef(fit)[1])}
+shinyServer(
+        function(input, output) {
+                output$inputValue &lt;- renderPrint({input$carat})
+                output$prediction &lt;- renderPrint({CaratPrice(input$carat)})
+        }
+)
+</code></pre>
+
+<h3>Following link is the application Diamond Price Calculation</h3>
+
+<h5><a href="https://sugatas77.shinyapps.io/DiamondData/" target="_blank">Diamonds Cost Predictor</a>.</h5>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='How much cost a Diamond?'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title=''>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title=''>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='server.r'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
